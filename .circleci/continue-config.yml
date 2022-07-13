@@ -1,0 +1,38 @@
+version: 2.1
+
+parameters:
+  mapping-file-status:
+    type: boolean
+    default: false
+
+jobs:
+  conditional-job:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - run: 
+          name: Check the parameters
+          command: |
+            echo "pipeline.parameters.mapping-file-status is <<pipeline.parameters.mapping-file-status>>"
+      - when:
+          # this step is only run when mapping file has been chaged
+          condition: <<pipeline.parameters.mapping-file-status>>
+          steps:
+            - run: 
+                name: Execute command
+                command: |
+                  echo "descripe command here to exectue"
+      - unless:
+          # you can make blank step here to return green status when file has been not chaged
+          condition: <<pipeline.parameters.mapping-file-status>>
+          steps:
+            - run: 
+                name: Skip and return green
+                command: |
+                  echo "mapping directory does not changed"
+
+workflows:
+  conditional-workflow:
+    jobs: 
+      - conditional-job
